@@ -2,8 +2,12 @@
 
 void setup()
 {
-  //  TWBR = 12;  // 400 kbit/sec I2C speed
   Serial.begin(115200);
+  gps.Setup();
+  mpu9250.Setup();
+  //display.Setup(true);
+  display.Setup(false);
+  //  TWBR = 12;  // 400 kbit/sec I2C speed
 
   // Set up the interrupt pin, its set as active high, push-pull
   pinMode(intPin, INPUT);
@@ -12,9 +16,6 @@ void setup()
   digitalWrite(myLed, HIGH);
 
   // Set up for data display
-  display.begin();
-  display.setPowerSave(0);
-  display.setFont(u8x8_font_chroma48medium8_r);
 }
 
 void DoLX200Communication()
@@ -47,6 +48,8 @@ void DoLX200Communication()
 
 void loop()
 {
+  counter = (++counter) % 2;
+  digitalWrite(myLed, counter);
   GeoData geoData = gps.GetGeoData();
   mpu9250.ReadHeading();
   long altitude = mpu9250.GetAltitude();
@@ -54,37 +57,50 @@ void loop()
   long lst = gps.GetLocalSiderealTime();
   
   AZ_to_EQ(altitude, azimuth, lst, geoData);
-
   if (Serial.available() > 0)
   {
     DoLX200Communication();
   }
 
-  display.setCursor(0,0);
-  display.println(micros());
+  display.oled.setCursor(0,0);
+  display.println(String(micros()));
 
   TinyGPSDate date = gps.GetDate();
   TinyGPSTime time = gps.GetTime();
 
   String separator = "-";
-  display.print(date.year() + separator + date.month() + separator + date.day());
+  /*
+  Serial.println("---------");
+  Serial.println(date.year());
+  Serial.println(date.month());
+  Serial.println(date.day());
+  Serial.println(time.hour());
+  Serial.println(time.minute());
+  Serial.println(time.second());
+  */
+  display.println(date.year() + separator + date.month() + separator + date.day());
   separator = ":";
   display.println(time.hour() + separator + time.minute() + separator + time.second());
 
-  display.print("(");
+  display.println(String("(") + geoData.Latitude + String(", ") + geoData.Longitude + String(")"));
+  display.println(String("(") + altitude + String(", ") + azimuth + String(")"));
+
+/*  display.print("(");
   display.print(geoData.Latitude);
-  display.print("°, ");
+  display.print(", ");
   display.print(geoData.Longitude);
-  display.println("°)");
-  
+  display.println(")");
+ */
+/* 
   display.print("(");
   display.print(altitude);
   display.print(", ");
   display.print(azimuth);
-  display.println("°)");
-  
-  display.println(lst);
-  display.refreshDisplay();
+  display.println(")");
+*/
+  //display.println(lst);
+  display.oled.refreshDisplay();
+  delay(1000);
 }
 
 //===================================================================================================================

@@ -28,6 +28,7 @@ class Heading
 {
 public:
     Heading();
+    void Setup();
     bool Initialized = false;
 
     void ReadHeading();

@@ -4,13 +4,17 @@
 class GPS 
 {
     private:
-        static const uint32_t GPSBaud = 9600;
         TinyGPSPlus gps;
+        GeoData lastGoodData;
+        TinyGPSTime _time;
+        TinyGPSDate _date;
 
     public:
         GPS(); 
+        void Setup();
         GeoData GetGeoData();
         long GetLocalSiderealTime();
-        TinyGPSDate GetDate() { gps.date; }
-        TinyGPSTime GetTime() { gps.time; }
+        TinyGPSDate GetDate() { return _date; }
+        TinyGPSTime GetTime() { return _time; }
+        static const uint32_t GPSBaud = 9600;
 };
